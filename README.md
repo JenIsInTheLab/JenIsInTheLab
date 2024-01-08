@@ -1,0 +1,5 @@
+- 👋 Hi, I’m @JenIsInTheLab
+- 👀 I’m interested in Photography, Camping and Developmental and Synthetic Biology
+- 🌱 I’m currently learning R for Data Science and Fiji/ImageJ Macros for batch processing of microscopy images
+- 💞️ I’m looking to collaborate on R scripts for scientific analysis, absolute qPCR quantification, Fiji Plugins and MAcros for Gastruoid Image Analysis
+- 📫 You can reach me at jannoh@ed.ac.uk
