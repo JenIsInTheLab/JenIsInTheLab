@@ -1,0 +1,96 @@
+//define source directory
+input=getDirectory("Where are the RAW files?");
+
+//output directory for adjusted image files
+adjusted_output=getDirectory("Where to save edited Img files?");
+
+//output directory for edited image mask and ROI
+maskAndROI=getDirectory("Where to save Masks and ROI?");
+
+//define output directory for measurements
+measurements_output=getDirectory("Where to save Measurements?");
+
+//output directory for particle outlines
+outlines_output=getDirectory("Where to save ROI Object Mask Overlays?");
+
+
+//list of files to Batch Analyse
+list=getFileList(input);
+
+//headless running (without opening images) toggle on once macro is tested
+setBatchMode(true);
+
+//for loop for batch processing all images in input directory
+for (i = 0; i <= list.length; i++) {
+	open(input+list[i]);
+	
+	//image ID
+	nameWext=getInfo("image.filename");
+	name = replace(nameWext, ".tif", "");
+
+	//duplicate file
+	run("Duplicate...", name);
+	//enhance contrast
+	run("Enhance Contrast", "saturated=0.35");
+	//blur for edge smoothing
+	
+	//save adjusted image files
+	ImgName=name + "_adjusted.png";
+	AdjOut=adjusted_output + ImgName;
+	saveAs("PNG", AdjOut);
+	
+	run("Gaussian Blur...", "sigma=3.0");
+	//thresholding and mask
+	//setAutoThreshold("Default no-reset");  //light background (BF images)
+	setAutoThreshold("Default dark no-reset");  //dark background (IF images)
+	setOption("BlackBackground", true);
+	run("Convert to Mask");
+	
+	//fill small gaps within objets
+	run("Fill Holes");
+	
+	//mask name
+	MaskName=name + "_mask.png";
+	//variable for automated saving
+	MaskOut=maskAndROI + MaskName;
+	//save mask
+	saveAs("PNG", MaskOut);
+
+	//find objects
+		run("Analyze Particles...", "size=900-Infinity show=[Overlay Masks] display overlay add"); //includes edges
+	
+	//run("Analyze Particles...", "size=900-Infinity show=[Overlay Masks] display exclude overlay add"); //excludes edges
+	
+	//define ROI name and output
+	ROIname=name + "_ROI.zip";
+	ROIOut=maskAndROI + ROIname;
+	//save ROI set
+	roiManager("Save", ROIOut);
+			
+	//flatten ROI and outlines onto mask
+	run("Flatten");
+	//define outline name
+	OutlineName=name + "_outlines.png";
+	OutlineOut=outlines_output + OutlineName;
+	//save particle outlines
+	saveAs("PNG", OutlineOut);
+
+	//define name to save results
+	resultsName=name + "_measurements.csv";
+	//variable for automated results saving
+	resultsOut=measurements_output + resultsName;
+	//save measurements
+	saveAs("Results", resultsOut);
+	
+	
+	//clear ROI manager
+	roiManager("Delete");
+	//remove results before next image
+	close("Results");
+
+		
+	}   //end of for loop
+
+
+
+exit
